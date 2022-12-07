@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DataMongoTest(excludeAutoConfiguration = EmbeddedMongoAutoConfiguration.class)
-public class BudgetExpenseRepositoryTests {
+public class BudgetExpenseRepositoryTests extends MongoDbTestBase{
 
   @Autowired
   private BudgetExpenseRepository repository;

@@ -17,7 +17,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
-class BudgetExpenseServiceImplTests {
+class BudgetExpenseServiceImplTests extends MongoDbTestBase{
 
 	@Autowired
 	private WebTestClient testClient;

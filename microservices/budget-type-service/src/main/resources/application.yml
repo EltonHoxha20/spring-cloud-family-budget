@@ -80,7 +80,6 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
   datasource:
     url: jdbc:mysql://localhost/budget-type-db
     username: user
