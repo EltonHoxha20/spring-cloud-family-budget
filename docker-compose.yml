@@ -1,0 +1,87 @@
+version: '2.1'
+
+services:
+  budget-type:
+    build: microservices/budget-type-service
+    mem_limit: 512m
+    ports:
+      - "8083:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      mysql_budget_type:
+        condition: service_healthy
+
+  budget-item:
+    build: microservices/budget-item-service
+    mem_limit: 512m
+    ports:
+      - "8082:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      mysql_budget_item:
+        condition: service_healthy
+
+  budget-expense:
+    build: microservices/budget-expense-service
+    mem_limit: 512m
+    ports:
+      - "8081:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      mongodb:
+        condition: service_healthy
+
+  budget-aggregator:
+    build: microservices/budget-aggregator-service
+    mem_limit: 512m
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  mongodb:
+    image: mongo:4.4.2
+    mem_limit: 512m
+    ports:
+      - "27017:27017"
+    command: mongod
+    healthcheck:
+      test: "mongo --eval 'db.stats().ok'"
+      interval: 5s
+      timeout: 2s
+      retries: 60
+
+  mysql_budget_type:
+    image: mysql:5.7.32
+    mem_limit: 512m
+    ports:
+      - "3307:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpwd
+      - MYSQL_DATABASE=budget-type-db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=pwd
+    healthcheck:
+      test: "/usr/bin/mysql --user=user --password=pwd --execute \"SHOW DATABASES;\""
+      interval: 5s
+      timeout: 2s
+      retries: 60
+
+  mysql_budget_item:
+    image: mysql:5.7.32
+    mem_limit: 512m
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpwd
+      - MYSQL_DATABASE=budget-item-db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=pwd
+    healthcheck:
+      test: "/usr/bin/mysql --user=user --password=pwd --execute \"SHOW DATABASES;\""
+      interval: 5s
+      timeout: 2s
+      retries: 60

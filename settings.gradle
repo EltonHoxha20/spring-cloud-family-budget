@@ -1,0 +1,7 @@
+include ':api'
+include ':util'
+include ':microservices:budget-type-service'
+include ':microservices:budget-item-service'
+include ':microservices:budget-expense-service'
+include ':microservices:budget-aggregator-service'
+
