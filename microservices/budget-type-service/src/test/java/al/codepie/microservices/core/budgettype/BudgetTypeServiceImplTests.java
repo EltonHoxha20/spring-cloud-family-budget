@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.data.repository.core.support.RepositoryComposition.RepositoryFragments.just;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 class BudgetTypeServiceImplTests {
@@ -107,7 +107,7 @@ class BudgetTypeServiceImplTests {
   @Test
   void getBudgetTypeNotFound() {
     long budgetTypeId = 123L;
-    getAndVerifyBudgetType("/" + budgetTypeId, OK)
+    getAndVerifyBudgetType("/" + budgetTypeId, NOT_FOUND)
         .jsonPath("$.path").isEqualTo("/budget-type")
         .jsonPath("$.message").isEqualTo("No Budget Type was found with Id :123");
   }
@@ -131,7 +131,7 @@ class BudgetTypeServiceImplTests {
     return testClient.post()
         .uri("budget-type")
         .accept(MediaType.APPLICATION_JSON)
-        .body(just(budgetType), BudgetType.class)
+        .bodyValue(just(budgetType))
         .exchange()
         .expectStatus().isEqualTo(expectedStatus)
         .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -142,7 +142,7 @@ class BudgetTypeServiceImplTests {
     return testClient.put()
         .uri("budget-type")
         .accept(MediaType.APPLICATION_JSON)
-        .body(just(budgetType), BudgetType.class)
+        .bodyValue(just(budgetType))
         .exchange()
         .expectStatus().isEqualTo(expectedStatus)
         .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -157,6 +157,5 @@ class BudgetTypeServiceImplTests {
         .expectStatus().isEqualTo(expectedStatus)
         .expectBody();
   }
-
 
 }

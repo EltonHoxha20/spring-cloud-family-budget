@@ -8,13 +8,20 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static java.util.stream.IntStream.rangeClosed;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.springframework.data.domain.Sort.Direction.ASC;
 import static org.springframework.transaction.annotation.Propagation.NOT_SUPPORTED;
 
 //This annotation starts up a SQL database when the test starts.
@@ -109,6 +116,29 @@ public class BudgetTypeRepositoryTests extends MySqlTestBase {
     BudgetTypeEntity updatedEntity = repository.findById(savedEntity.getId()).get();
     assertEquals(1, updatedEntity.getVersion());
     assertEquals(222.22, updatedEntity.getTotalIncome());
+  }
+
+  @Test
+  void paging() {
+
+    repository.deleteAll();
+
+    List<BudgetTypeEntity> newBudgetTypes = rangeClosed(2, 11)
+        .mapToObj(i -> BudgetTypeEntity.builder().id((long) i).type(BudgetTypeEnum.MONTHLY).totalIncome((double) (i*2)).build())
+        .collect(Collectors.toList());
+    repository.saveAll(newBudgetTypes);
+
+    Pageable nextPage = PageRequest.of(0, 4, ASC, "id");
+    nextPage = testNextPage(nextPage, "[2, 3, 4, 5]", true);
+    nextPage = testNextPage(nextPage, "[6, 7, 8, 9]", true);
+    nextPage = testNextPage(nextPage, "[10, 11]", false);
+  }
+
+  private Pageable testNextPage(Pageable nextPage, String expectedBudgetTypeIds, boolean expectsNextPage) {
+    Page<BudgetTypeEntity> budgetTypePage = repository.findAll(nextPage);
+    assertEquals(expectedBudgetTypeIds, budgetTypePage.getContent().stream().map(BudgetTypeEntity::getId).toList().toString());
+    assertEquals(expectsNextPage, budgetTypePage.hasNext());
+    return budgetTypePage.nextPageable();
   }
 
   private void assertEqualsBudgetType(BudgetTypeEntity expectedEntity, BudgetTypeEntity actualEntity) {

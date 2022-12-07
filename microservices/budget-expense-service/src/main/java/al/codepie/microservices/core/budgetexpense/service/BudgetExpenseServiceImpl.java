@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,7 +22,7 @@ import java.util.Optional;
 @Log4j2
 public class BudgetExpenseServiceImpl implements BudgetExpenseService {
 
- // private final BudgetItemService budgetItemService;
+  // private final BudgetItemService budgetItemService;
   private final BudgetExpenseRepository repository;
 
   private final BudgetExpenseMapper mapper;
@@ -32,8 +31,8 @@ public class BudgetExpenseServiceImpl implements BudgetExpenseService {
 
   @Autowired
   public BudgetExpenseServiceImpl(/*BudgetItemService budgetItemService,*/ BudgetExpenseRepository repository,
-                                  BudgetExpenseMapper mapper, ServiceUtil serviceUtil) {
-  //  this.budgetItemService = budgetItemService;
+                                                                           BudgetExpenseMapper mapper, ServiceUtil serviceUtil) {
+    //  this.budgetItemService = budgetItemService;
     this.repository = repository;
     this.mapper = mapper;
     this.serviceUtil = serviceUtil;
@@ -43,11 +42,11 @@ public class BudgetExpenseServiceImpl implements BudgetExpenseService {
   @Transactional(rollbackFor = {InvalidInputException.class})
   public BudgetExpense createBudgetExpense(BudgetExpense body) {
     try {
-   //   if (budgetItemService.getBudgetSubItem(body.getBudgetSubItemId()) != null) {
-        BudgetExpenseEntity entity = mapper.apiToEntity(body);
-        entity.setRegistrationDate(LocalDateTime.now());
-        BudgetExpenseEntity newEntity = repository.save(entity);
-        return mapper.entityToApi(newEntity);
+      //   if (budgetItemService.getBudgetSubItem(body.getBudgetSubItemId()) != null) {
+      BudgetExpenseEntity entity = mapper.apiToEntity(body);
+      entity.setRegistrationDate(LocalDateTime.now());
+      BudgetExpenseEntity newEntity = repository.save(entity);
+      return mapper.entityToApi(newEntity);
 //      }
 //      throw new NotFoundException("No Budget Sub Item was found with Id :" + body.getBudgetSubItemId());
     } catch (DataIntegrityViolationException dive) {
@@ -58,22 +57,23 @@ public class BudgetExpenseServiceImpl implements BudgetExpenseService {
   @Override
   public BudgetExpense updateBudgetExpense(BudgetExpense body) {
     try {
- //     if (budgetItemService.getBudgetSubItem(body.getBudgetSubItemId()) != null) {
+      //     if (budgetItemService.getBudgetSubItem(body.getBudgetSubItemId()) != null) {
       Optional<BudgetExpenseEntity> foundEntity = repository.findById(body.getId());
-        if(foundEntity.isPresent()) {
-          BudgetExpenseEntity entityToUpdate = mapper.apiToEntity(body);
-          entityToUpdate.setId(foundEntity.get().getId());
-          entityToUpdate.setVersion(foundEntity.get().getVersion());
-          entityToUpdate.setRegistrationDate(LocalDateTime.now());
-          BudgetExpenseEntity updatedEntity = repository.save(entityToUpdate);
-          return mapper.entityToApi(updatedEntity);
-        }
-        throw new NotFoundException("No Budget Expense was found with Id :" + body.getId());
+      if (foundEntity.isPresent()) {
+        BudgetExpenseEntity entityToUpdate = mapper.apiToEntity(body);
+        entityToUpdate.setId(foundEntity.get().getId());
+        entityToUpdate.setVersion(foundEntity.get().getVersion());
+        entityToUpdate.setRegistrationDate(LocalDateTime.now());
+        BudgetExpenseEntity updatedEntity = repository.save(entityToUpdate);
+        return mapper.entityToApi(updatedEntity);
+      }
+      throw new NotFoundException("No Budget Expense was found with Id :" + body.getId());
 //      }
 //      throw new NotFoundException("No Budget Sub Item was found with Id :" + body.getBudgetSubItemId());
     } catch (DataIntegrityViolationException dive) {
       throw new InvalidInputException("Duplicate key, budgetExpense Id: {}" + body.getId());
-    }  }
+    }
+  }
 
   @Override
   public BudgetExpense getBudgetExpense(String budgetExpenseId) {
@@ -83,7 +83,8 @@ public class BudgetExpenseServiceImpl implements BudgetExpenseService {
 
     response.setServiceAddress(serviceUtil.getServiceAddress());
     log.debug("getBudgetExpense: Found Budget Expense with id: {}", response.getId());
-    return response;  }
+    return response;
+  }
 
   @Override
   public void deleteBudgetExpense(String budgetExpenseId) {
@@ -95,7 +96,7 @@ public class BudgetExpenseServiceImpl implements BudgetExpenseService {
   public List<BudgetExpense> getBudgetExpenses(BudgetExpenseRequest request) {
     log.debug("getBudgetExpenses: Budget Expense with from: {}, to: {}, ids: {}", request.getFrom(), request.getTo(), request.getSubItemIds());
     List<BudgetExpenseEntity> list = repository.findAllByRegistrationDateBetweenAndBudgetSubItemIdIn(request.getFrom(), request.getTo(), request.getSubItemIds());
-    if(list.isEmpty()){
+    if (list.isEmpty()) {
       throw new NotFoundException("No Budget Expenses were found with ids:" + request.getSubItemIds());
     }
     return mapper.entityListToApiList(list);
